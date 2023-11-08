@@ -43,6 +43,10 @@ public:
      */
     void access(Locomotive &loco) override {
         // TODO
+        mutex.acquire();
+        if(loco.priority){
+           attente.acquire();
+          }
 
         // Exemple de message dans la console globale
         afficher_message(qPrintable(QString("The engine no. %1 accesses the shared section.").arg(loco.numero())));
@@ -80,6 +84,9 @@ public:
     /* A vous d'ajouter ce qu'il vous faut */
 
 private:
+    PcoSemaphore attente{0};
+    PcoSemaphore mutex{1};
+
     // Méthodes privées ...
     // Attribut privés ...
 };
