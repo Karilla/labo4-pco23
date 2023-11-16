@@ -18,14 +18,13 @@
 // Laissez les numéros des locos à 0 et 1 pour ce laboratoire
 
 // Locomotive A
-static Locomotive locoA(7 /* Numéro (pour commande trains sur maquette réelle) */, 10 /* Vitesse */);
+static Locomotive locoA(0 /* Numéro (pour commande trains sur maquette réelle) */, 10 /* Vitesse */);
 // Locomotive B
-static Locomotive locoB(42 /* Numéro (pour commande trains sur maquette réelle) */, 12 /* Vitesse */);
+static Locomotive locoB(1 /* Numéro (pour commande trains sur maquette réelle) */, 12 /* Vitesse */);
 
 //Arret d'urgence
 void emergency_stop()
 {
-  static bool is_stopped = false;
     // TODO
     locoA.arreter();
     locoB.arreter();
@@ -85,10 +84,12 @@ int cmain()
     // Loco 0
     // Exemple de position de départ
     locoA.fixerPosition(31, 1);
+    locoA.priority = 0;
 
     // Loco 1
     // Exemple de position de départ
     locoB.fixerPosition(34, 5);
+    locoB.priority = 1;
 
     /***********
      * Message *
