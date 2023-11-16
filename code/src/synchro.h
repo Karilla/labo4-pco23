@@ -11,7 +11,7 @@
 #define SYNCHRO_H
 
 #include <QDebug>
-
+#include <pcosynchro/pcothread.h>
 #include <pcosynchro/pcosemaphore.h>
 
 #include "locomotive.h"
@@ -31,7 +31,7 @@ public:
      * Initialisez vos éventuels attributs ici, sémaphores etc.
      */
     Synchro() {
-        // TODO
+       nbTour = 0;
     }
 
     /**
@@ -42,10 +42,18 @@ public:
      * @param loco La locomotive qui essaie accéder à la section partagée
      */
     void access(Locomotive &loco) override {
+      loco.afficherMessage(qPrintable(QString("Ma priorité est de %1 .").arg(loco.priority)));
         // TODO
+      int priority = loco.priority;
         mutex.acquire();
         if(loco.priority){
-           attente.acquire();
+            mutex.release();
+          }
+        else{
+            mutex.release();
+            loco.arreter();
+            waiting.acquire();
+            loco.demarrer();
           }
 
         // Exemple de message dans la console globale
@@ -62,6 +70,9 @@ public:
     void leave(Locomotive& loco) override {
         // TODO
 
+      if(loco.priority){
+          waiting.release();
+        }
         // Exemple de message dans la console globale
         afficher_message(qPrintable(QString("The engine no. %1 leaves the shared section.").arg(loco.numero())));
     }
@@ -76,7 +87,9 @@ public:
      */
     void stopAtStation(Locomotive& loco) override {
         // TODO
-
+        loco.arreter();
+        PcoThread::thisThread()->usleep(5000000);
+        loco.demarrer();
         // Exemple de message dans la console globale
         afficher_message(qPrintable(QString("The engine no. %1 arrives at the station.").arg(loco.numero())));
     }
@@ -84,11 +97,14 @@ public:
     /* A vous d'ajouter ce qu'il vous faut */
 
 private:
-    PcoSemaphore attente{0};
+    PcoSemaphore waiting{0};
     PcoSemaphore mutex{1};
 
     // Méthodes privées ...
     // Attribut privés ...
+
+    int nbTour;
+    static int indexLast;
 };
 
 
