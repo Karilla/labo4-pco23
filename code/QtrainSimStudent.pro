@@ -9,10 +9,12 @@ HEADERS +=  \
     src/locomotive.h \
     src/launchable.h \
     src/locomotivebehavior.h \
+    src/parcours.h \
     src/synchro.h \
     src/synchrointerface.h
 
 SOURCES +=  \
     src/locomotive.cpp \
     src/cppmain.cpp \
-    src/locomotivebehavior.cpp
+    src/locomotivebehavior.cpp \
+    src/parcours.cpp

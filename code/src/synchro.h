@@ -56,9 +56,7 @@ public:
             loco.afficherMessage("Je m'arrete bonne nuit");
             waiting.acquire();
             mutex.acquire();
-            if(!emergency){
-                loco.demarrer();
-            }
+            loco.demarrer();
             mutex.release();
           }
 

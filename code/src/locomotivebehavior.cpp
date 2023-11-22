@@ -38,6 +38,7 @@ void LocomotiveBehavior::run()
         if((loco.numero() == 0) ){
             attendre_contact(29);
             sharedSection->stopAtStation(loco);
+            //attendre_contact()
             attendre_contact(28);
             loco.afficherMessage(qPrintable(QString("J'arrive en section critique avec la prorité.").arg(loco.priority)));
             sharedSection->access(loco);
