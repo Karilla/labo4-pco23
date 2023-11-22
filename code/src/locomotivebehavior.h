@@ -27,10 +27,7 @@ public:
      */
     LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SynchroInterface> sharedSection, Parcours parcours /*, autres paramètres éventuels */) : loco(loco), sharedSection(sharedSection), parcours(parcours) {
         // Eventuel code supplémentaire du constructeur
-
     }
-
-    static void emergency();
 
 protected:
     /*!

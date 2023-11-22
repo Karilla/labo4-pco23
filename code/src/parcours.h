@@ -15,4 +15,6 @@ public:
     Parcours(int gare, int startSharedSection, int endSharedSection, int accessContact, int accessDirection, int leaveContact, int leaveDirection);
 };
 
+
+
 #endif // PARCOURS_H
