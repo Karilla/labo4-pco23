@@ -32,7 +32,6 @@ public:
      */
     Synchro() {
         this->compteurLoco = 0;
-        this->emergency = false;
     }
 
     /**
@@ -45,7 +44,7 @@ public:
     void access(Locomotive &loco) override {
       loco.afficherMessage(qPrintable(QString("Ma priorité est de %1 .").arg(loco.priority)));
         // TODO
-      int priority = loco.priority;
+
         mutex.acquire();
         if(loco.priority){
             mutex.release();
@@ -53,7 +52,7 @@ public:
         else{
             mutex.release();
             loco.arreter();
-            loco.afficherMessage("Je m'arrete bonne nuit");
+            loco.afficherMessage("J'attends de pouvoir accéder à la section critique.");
             waiting.acquire();
             mutex.acquire();
             loco.demarrer();
@@ -94,7 +93,7 @@ public:
         loco.arreter();
         mutex.acquire();
         compteurLoco++;
-        if(compteurLoco > 1){
+        if(compteurLoco >= 2){
             loco.priority = 1;
             gare.release();
             compteurLoco = 0;
@@ -112,9 +111,6 @@ public:
     }
 
     /* A vous d'ajouter ce qu'il vous faut */
-    void setEmergency(){
-        this->emergency = true;
-    }
 
 private:
     PcoSemaphore waiting{0};
@@ -123,9 +119,8 @@ private:
 
     // Méthodes privées ...
     // Attribut privés ...
-    bool emergency;
     int compteurLoco;
-    static int indexLast;
+
 };
 
 

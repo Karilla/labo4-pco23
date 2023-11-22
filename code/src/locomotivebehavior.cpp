@@ -11,9 +11,6 @@
 
 using LocoID = int;
 
-void LocomotiveBehavior::emergency(){
-    //sharedSection.setEmergency();
-}
 
 void LocomotiveBehavior::run()
 {
@@ -35,14 +32,15 @@ void LocomotiveBehavior::run()
         // On attend qu'une locomotive arrive sur le contact 1.
         // Pertinent de faire ça dans les deux threads? Pas sûr...
         //attendre_contact(25);
-        if((loco.numero() == 0) ){
+        /*if((loco.numero() == 0) ){
             attendre_contact(29);
             sharedSection->stopAtStation(loco);
             //attendre_contact()
             attendre_contact(28);
             loco.afficherMessage(qPrintable(QString("J'arrive en section critique avec la prorité.").arg(loco.priority)));
             sharedSection->access(loco);
-            attendre_contact(15);
+            //attendre_contact(15);
+            diriger_aiguillage(15, TOUT_DROIT, 0);
             diriger_aiguillage(8,TOUT_DROIT,0);
             attendre_contact(10);
             sharedSection->leave(loco);
@@ -53,12 +51,26 @@ void LocomotiveBehavior::run()
             attendre_contact(32);
             loco.afficherMessage(qPrintable(QString("J'arrive en section critique avec la prorité.").arg(loco.priority)));
             sharedSection->access(loco);
-            attendre_contact(15);
+            //attendre_contact(15);
+            diriger_aiguillage(15, DEVIE, 0);
             diriger_aiguillage(8,DEVIE,0);
             attendre_contact(14);
             sharedSection->leave(loco);
-          }
-        loco.afficherMessage("J'ai atteint le contact 1");
+          }*/
+        parcours.waitForStation();
+        loco.afficherMessage("J'arrive à la gare.");
+        sharedSection->stopAtStation(loco);
+
+
+        parcours.waitForStartSharedSection();
+        loco.afficherMessage(qPrintable(QString("J'arrive en section critique avec la prorité.").arg(loco.priority)));
+        sharedSection->access(loco);
+        loco.afficherMessage("J'acccède à la section critique.");
+        parcours.adjustAiguillages();
+
+        parcours.waitForEndSharedSection();
+        sharedSection->leave(loco);
+        loco.afficherMessage("Je quitte la section critique.");
     }
 }
 

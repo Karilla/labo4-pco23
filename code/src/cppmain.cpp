@@ -12,6 +12,7 @@
 #include "locomotivebehavior.h"
 #include "synchrointerface.h"
 #include "synchro.h"
+#include "parcours.h"
 #include <iostream>
 
 // Locomotives :
@@ -109,10 +110,14 @@ int cmain()
     // Création de la section partagée
     std::shared_ptr<SynchroInterface> sharedSection = std::make_shared<Synchro>();
 
+    // Création des parcours des locomotives
+    Parcours parcoursLoco0  = Parcours(29, 28, 10, 15, TOUT_DROIT, 8, TOUT_DROIT);
+    Parcours parcoursLoco1  = Parcours(33, 32, 14, 15, DEVIE, 8, DEVIE);
+
     // Création du thread pour la loco 0
-    std::unique_ptr<Launchable> locoBehaveA = std::make_unique<LocomotiveBehavior>(locoA, sharedSection /*, autres paramètres ...*/);
+    std::unique_ptr<Launchable> locoBehaveA = std::make_unique<LocomotiveBehavior>(locoA, sharedSection, parcoursLoco0 /*, autres paramètres ...*/);
     // Création du thread pour la loco 1
-    std::unique_ptr<Launchable> locoBehaveB = std::make_unique<LocomotiveBehavior>(locoB, sharedSection /*, autres paramètres ...*/);
+    std::unique_ptr<Launchable> locoBehaveB = std::make_unique<LocomotiveBehavior>(locoB, sharedSection, parcoursLoco1 /*, autres paramètres ...*/);
 
     // Lanchement des threads
     afficher_message(qPrintable(QString("Lancement thread loco A (numéro %1)").arg(locoA.numero())));
