@@ -28,6 +28,8 @@ public:
         // Eventuel code supplémentaire du constructeur
     }
 
+    static void emergency();
+
 protected:
     /*!
      * \brief run Fonction lancée par le thread, représente le comportement de la locomotive

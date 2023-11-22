@@ -31,7 +31,8 @@ public:
      * Initialisez vos éventuels attributs ici, sémaphores etc.
      */
     Synchro() {
-       nbTour = 0;
+        this->compteurLoco = 0;
+        this->emergency = false;
     }
 
     /**
@@ -52,8 +53,13 @@ public:
         else{
             mutex.release();
             loco.arreter();
+            loco.afficherMessage("Je m'arrete bonne nuit");
             waiting.acquire();
-            loco.demarrer();
+            mutex.acquire();
+            if(!emergency){
+                loco.demarrer();
+            }
+            mutex.release();
           }
 
         // Exemple de message dans la console globale
@@ -86,8 +92,21 @@ public:
      * @param loco La locomotive qui doit attendre à la gare
      */
     void stopAtStation(Locomotive& loco) override {
-        // TODO
+
         loco.arreter();
+        mutex.acquire();
+        compteurLoco++;
+        if(compteurLoco > 1){
+            loco.priority = 1;
+            gare.release();
+            compteurLoco = 0;
+            mutex.release();
+        }
+        else{
+            loco.priority = 0;
+            mutex.release();
+            gare.acquire();
+        }
         PcoThread::thisThread()->usleep(5000000);
         loco.demarrer();
         // Exemple de message dans la console globale
@@ -95,15 +114,19 @@ public:
     }
 
     /* A vous d'ajouter ce qu'il vous faut */
+    void setEmergency(){
+        this->emergency = true;
+    }
 
 private:
     PcoSemaphore waiting{0};
     PcoSemaphore mutex{1};
+    PcoSemaphore gare{0};
 
     // Méthodes privées ...
     // Attribut privés ...
-
-    int nbTour;
+    bool emergency;
+    int compteurLoco;
     static int indexLast;
 };
 

@@ -12,11 +12,12 @@
 #include "locomotivebehavior.h"
 #include "synchrointerface.h"
 #include "synchro.h"
+#include <iostream>
 
 // Locomotives :
 // Vous pouvez changer les vitesses initiales, ou utiliser la fonction loco.fixerVitesse(vitesse);
 // Laissez les numéros des locos à 0 et 1 pour ce laboratoire
-
+bool emergency = false;
 // Locomotive A
 static Locomotive locoA(0 /* Numéro (pour commande trains sur maquette réelle) */, 10 /* Vitesse */);
 // Locomotive B
@@ -26,8 +27,11 @@ static Locomotive locoB(1 /* Numéro (pour commande trains sur maquette réelle)
 void emergency_stop()
 {
     // TODO
+    //emergency = true;
     locoA.arreter();
     locoB.arreter();
+    locoA.fixerVitesse(0);
+    locoB.fixerVitesse(0);
     afficher_message("\nSTOP!");
 }
 
@@ -116,10 +120,12 @@ int cmain()
     afficher_message(qPrintable(QString("Lancement thread loco B (numéro %1)").arg(locoB.numero())));
     locoBehaveB->startThread();
 
+    while(true)
+
     // Attente sur la fin des threads
     locoBehaveA->join();
     locoBehaveB->join();
-
+    std::cout << "Stooped" << std::endl;
     //Fin de la simulation
     mettre_maquette_hors_service();
 

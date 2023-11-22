@@ -11,6 +11,10 @@
 
 using LocoID = int;
 
+void LocomotiveBehavior::emergency(){
+    //sharedSection.setEmergency();
+}
+
 void LocomotiveBehavior::run()
 {
     //Initialisation de la locomotive
@@ -19,9 +23,6 @@ void LocomotiveBehavior::run()
     loco.afficherMessage("Ready!");
 
     /* A vous de jouer ! */
-    unsigned int nbTourLocoA = 0;
-    unsigned int nbTourLocoB = 0;
-    LocoID locoId = 0;
 
     // Vous pouvez appeler les méthodes de la section partagée comme ceci :
     //sharedSection->access(loco);
@@ -37,16 +38,8 @@ void LocomotiveBehavior::run()
         if((loco.numero() == 0) ){
             attendre_contact(29);
             sharedSection->stopAtStation(loco);
-            nbTourLocoA++;
-            locoId = loco.numero();
-            if(nbTourLocoA <= nbTourLocoB && locoId !=/* On sait pas encore */ loco.numero()){
-              loco.priority = 1;
-              }
-            else{
-                loco.priority = 0;
-              }
-            attendre_contact(22);
-            loco.afficherMessage("J'arrive dans la section critique");
+            attendre_contact(28);
+            loco.afficherMessage(qPrintable(QString("J'arrive en section critique avec la prorité.").arg(loco.priority)));
             sharedSection->access(loco);
             attendre_contact(15);
             diriger_aiguillage(8,TOUT_DROIT,0);
@@ -56,16 +49,8 @@ void LocomotiveBehavior::run()
         else{
             attendre_contact(33);
             sharedSection->stopAtStation(loco);
-            nbTourLocoB++;
-            locoId = loco.numero();
-            if(nbTourLocoA <= nbTourLocoB && locoId !=/* On sait pas encore */ loco.numero()){
-              loco.priority;
-              }
-            else{
-                loco.priority = 0;
-              }
-            attendre_contact(25);
-            loco.afficherMessage("J'arrive en section critique");
+            attendre_contact(32);
+            loco.afficherMessage(qPrintable(QString("J'arrive en section critique avec la prorité.").arg(loco.priority)));
             sharedSection->access(loco);
             attendre_contact(15);
             diriger_aiguillage(8,DEVIE,0);
