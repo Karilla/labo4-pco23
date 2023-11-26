@@ -30,97 +30,110 @@ public:
      * @brief Synchro Constructeur de la classe qui représente la section partagée.
      * Initialisez vos éventuels attributs ici, sémaphores etc.
      */
-    Synchro() {
-        this->compteurLoco = 0;
+    Synchro(unsigned int nbLocomotives):  waiting(0), station(0), mutex(1), nbLoco(nbLocomotives) {
+        this->locoCounter = 0;
     }
 
     /**
      * @brief access Méthode à appeler pour accéder à la section partagée
-     *
-     * Elle doit arrêter la locomotive et mettre son thread en attente si nécessaire.
-     *
+     * Elle arrête la locomotive et met son thread en attente si nécessaire.
      * @param loco La locomotive qui essaie accéder à la section partagée
      */
     void access(Locomotive &loco) override {
-      loco.afficherMessage(qPrintable(QString("Ma priorité est de %1 .").arg(loco.priority)));
-        // TODO
+
+        loco.afficherMessage(qPrintable(QString("Ma priorité est de %1 .").arg(loco.priority)));
 
         mutex.acquire();
+
         if(loco.priority){
+
             mutex.release();
           }
         else{
+
+            // On relâche le mutex pour ne pas bloquer les autres threads
             mutex.release();
             loco.arreter();
-            loco.afficherMessage("J'attends de pouvoir accéder à la section critique.");
+            loco.afficherMessage("J'attends mon tour.");
             waiting.acquire();
+            // On récupère le mutex lorsqu'on peut accéder à la section partagée
             mutex.acquire();
             loco.demarrer();
             mutex.release();
           }
 
-        // Exemple de message dans la console globale
-        afficher_message(qPrintable(QString("The engine no. %1 accesses the shared section.").arg(loco.numero())));
+        afficher_message(qPrintable(QString("La locomotive no. %1 accède à la section partagée.").arg(loco.numero())));
     }
 
     /**
      * @brief leave Méthode à appeler pour indiquer que la locomotive est sortie de la section partagée
-     *
      * Réveille les threads des locomotives potentiellement en attente.
-     *
      * @param loco La locomotive qui quitte la section partagée
      */
     void leave(Locomotive& loco) override {
-        // TODO
 
       if(loco.priority){
+
           waiting.release();
         }
-        // Exemple de message dans la console globale
-        afficher_message(qPrintable(QString("The engine no. %1 leaves the shared section.").arg(loco.numero())));
+
+      afficher_message(qPrintable(QString("La locomotive no. %1 quitte la section partagée.").arg(loco.numero())));
     }
 
     /**
      * @brief stopAtStation Méthode à appeler quand la locomotive doit attendre à la gare
-     *
-     * Implémentez toute la logique que vous avez besoin pour que les locomotives
-     * s'attendent correctement.
-     *
      * @param loco La locomotive qui doit attendre à la gare
      */
     void stopAtStation(Locomotive& loco) override {
 
         loco.arreter();
         mutex.acquire();
-        compteurLoco++;
-        if(compteurLoco >= 2){
+        locoCounter++;
+
+        // Si on arrive à  la gare en dernier
+        if(locoCounter >= nbLoco){
+
             loco.priority = 1;
-            gare.release();
-            compteurLoco = 0;
+            station.release();
+            locoCounter = 0;
             mutex.release();
         }
-        else{
+        else{ // Si on n'arrive pas à la gare en dernier
+
             loco.priority = 0;
+            // On relâche le mutex pour ne pas bloquer les autres threads
             mutex.release();
-            gare.acquire();
+            station.acquire();
         }
+
+        // On attend 5 secondes
         PcoThread::thisThread()->usleep(5000000);
         loco.demarrer();
-        // Exemple de message dans la console globale
         afficher_message(qPrintable(QString("The engine no. %1 arrives at the station.").arg(loco.numero())));
     }
 
-    /* A vous d'ajouter ce qu'il vous faut */
-
 private:
-    PcoSemaphore waiting{0};
-    PcoSemaphore mutex{1};
-    PcoSemaphore gare{0};
 
-    // Méthodes privées ...
-    // Attribut privés ...
-    int compteurLoco;
-
+    /**
+     * @brief waiting Semaphore pour gérer l'accès à la section critique
+     */
+    PcoSemaphore waiting;
+    /**
+     * @brief station Semaphore pour gérer les arrivées en gare
+     */
+    PcoSemaphore station;
+    /**
+     * @brief mutex Mutex pour protéger les ressources partagées entre plusieurs threads
+     */
+    PcoSemaphore mutex;
+    /**
+     * @brief locoCounter Nombre de locomotives qui attendent à la gare
+     */
+    unsigned int locoCounter;
+    /**
+     * @brief nbLoco Nombre de locomotives dans la simulation
+     */
+    unsigned int nbLoco;
 };
 
 

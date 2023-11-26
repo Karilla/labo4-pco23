@@ -1,10 +1,12 @@
-/*  _____   _____ ____    ___   ___ ___  ____
- * |  __ \ / ____/ __ \  |__ \ / _ \__ \|___ \
- * | |__) | |   | |  | |    ) | | | | ) | __) |
- * |  ___/| |   | |  | |   / /| | | |/ / |__ <
- * | |    | |___| |__| |  / /_| |_| / /_ ___) |
- * |_|     \_____\____/  |____|\___/____|____/
- */
+/**
+\file locomotivebehavior.cpp
+\author Eva Ray, Benoit Delay
+\date 26.11.2023
+
+
+Ce fichier contient l'implémentation de la classe locomotivebehavior, qui permet de
+défnir le comportement d'une locomotive dans la simulation.
+*/
 
 #include "locomotivebehavior.h"
 #include "ctrain_handler.h"
@@ -17,46 +19,10 @@ void LocomotiveBehavior::run()
     //Initialisation de la locomotive
     loco.allumerPhares();
     loco.demarrer();
-    loco.afficherMessage("Ready!");
-
-    /* A vous de jouer ! */
-
-    // Vous pouvez appeler les méthodes de la section partagée comme ceci :
-    //sharedSection->access(loco);
-    //sharedSection->leave(loco);
-    //sharedSection->stopAtStation(loco);
+    loco.afficherMessage("Prêt!");
 
     while(true) {
-        //Section critique 25 22
-        // 10 14
-        // On attend qu'une locomotive arrive sur le contact 1.
-        // Pertinent de faire ça dans les deux threads? Pas sûr...
-        //attendre_contact(25);
-        /*if((loco.numero() == 0) ){
-            attendre_contact(29);
-            sharedSection->stopAtStation(loco);
-            //attendre_contact()
-            attendre_contact(28);
-            loco.afficherMessage(qPrintable(QString("J'arrive en section critique avec la prorité.").arg(loco.priority)));
-            sharedSection->access(loco);
-            //attendre_contact(15);
-            diriger_aiguillage(15, TOUT_DROIT, 0);
-            diriger_aiguillage(8,TOUT_DROIT,0);
-            attendre_contact(10);
-            sharedSection->leave(loco);
-          }
-        else{
-            attendre_contact(33);
-            sharedSection->stopAtStation(loco);
-            attendre_contact(32);
-            loco.afficherMessage(qPrintable(QString("J'arrive en section critique avec la prorité.").arg(loco.priority)));
-            sharedSection->access(loco);
-            //attendre_contact(15);
-            diriger_aiguillage(15, DEVIE, 0);
-            diriger_aiguillage(8,DEVIE,0);
-            attendre_contact(14);
-            sharedSection->leave(loco);
-          }*/
+
         parcours.waitForStation();
         loco.afficherMessage("J'arrive à la gare.");
         sharedSection->stopAtStation(loco);
