@@ -1,0 +1,61 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage[margin = 2cm]{geometry}
+
+\title{PCO Laboratoire 4 \\
+\large Gestion de Ressources}
+\author{Benoit Delay, Eva Ray}
+
+\begin{document}
+\maketitle
+
+\section*{Description des fonctionnalités du logiciel}
+
+Le programme simule le déplacement de deux locomotives, dont le comportment est exécuté par un thread. 
+Chaque locomotive a un certain point de départ et suit un parcours cyclique. Les deux
+parcours ont un tronçon commun, auquel une seule locomotive à la fois ne peut accéder. Ce tronçon est appelé "section partagée" ci-après. Si une
+locomotive est en train d'accéder à la section partagée, l'autre s'arrête et attend son tour. 
+
+\noindent
+Chaque locomotive a une gare attirée à laquelle elle doit s'arrêter. Les deux locomotives assurent une correspondance aux passagers, 
+afin qu'ils puissent changer de train si besoin. Ainsi, lorsque la première locomotive arrive en gare, elle s'arrête et attend la seconde. 
+Lorsque les deux locomotives sont en gare, elles attendent encore 5 secondes avant de repartir et continuer leur parcours. 
+
+\noindent
+La priorité d'accès à la section partagée est définie comme ceci: la locomotive qui arrive en gare en dernier est prioritaire. 
+
+\noindent
+Les locomotives continuent leur parcours de manière infinie. Le seul moyen de les arrêter est d'acctionner l'arrêt d'urgence. 
+
+\noindent
+Le logiciel simule le déplacement des locomotives par des threads différents, il est donc multi-threadé. Par conséquent, il doit 
+assurer une bonne gestion de la concurrence pour les ressources partagées entre plusieurs threads. En particuiler, l'accès à la section
+partagée doit être géré conformément au exigences citées ci-dessus. 
+
+\section*{Choix d'implémentation}
+% Comment avez-vous abordé le problème, quels choix avez-vous fait, quelle 
+% décomposition avez-vous choisie, quelles variables ont dû être protégées, ...
+\subsection*{Choix du parcours}
+Nous avons décidé de travailler sur la maquette \texttt{A}. L'imagination n'étant pas notre point fort, nous avons choisi de définir le parcours des
+locomotives de la même manière que dans l'exemple présent dans la consigne de laboratoire. Les points de départ des locomotives, les gares et la
+section critique sont mises en avant dans le schéma ci-dessous. 
+
+\begin{center}
+\includegraphics[scale = 0.6]{parcours_loco.png}
+\end{center}
+
+\subsection*{Gestion section partagée}
+
+\subsection*{Classe Route}
+
+\subsection*{Modularité}
+
+\section*{Tests effectués}
+\noindent
+
+\section*{Conclusion}
+% Description de chaque test, et information sur le fait qu'il ait passé ou non
+\noindent
+
+
+\end{document}
