@@ -25,7 +25,7 @@ Lorsque les deux locomotives sont en gare, elles attendent encore 5 secondes ava
 La priorité d'accès à la section partagée est définie comme ceci: la locomotive qui arrive en gare en dernier est prioritaire. 
 
 \noindent
-Les locomotives continuent leur parcours de manière infinie. Le seul moyen de les arrêter est d'acctionner l'arrêt d'urgence. 
+Les locomotives continuent leur parcours de manière infinie. Le seul moyen de les arrêter est d'actionner l'arrêt d'urgence. 
 
 \noindent
 Le logiciel simule le déplacement des locomotives par des threads différents, il est donc multi-threadé. Par conséquent, il doit 
@@ -45,10 +45,64 @@ section critique sont mises en avant dans le schéma ci-dessous.
 \end{center}
 
 \subsection*{Gestion section partagée}
+Pour gérer l'accès à la section partagée, nous avons ajouté un sémaphore \texttt{waiting} en attribut privé de la classe \texttt{Synchro}.
+Ce sémaphore est initialisé à 0 et agit comme une barrière. Tout thread qui tente d'acquérir le sémaphore est bloqué tant qu'un
+autre thread ne l'aura pas relâché. Ce sémaphore est utilisé dans la méthode \texttt{Synchro::access()}. 
+
+Si une locomotive qui
+n'a pas la priorité essaie d'accéder à la section partagée, elle va acquérir le sémaphore et se mettre en attente. Il faut alors
+qu'une autre locomomotive relâche le sémaphore. Cela se fait dans la méthode \texttt{Synchro::leave()}, qui est appelée dès qu'une
+locomotive quite la section partagée. Si une locomotive est en attente, on release le sémpahore \texttt{waiting} et elle peut
+à son tour accéder à la section partagée.
+
+\subsection*{Gestion attente à la gare}
+Pour gérer l'attente à la gare,  nous avons ajouté un sémaphore \texttt{station} et un compteur \texttt{locoCounter} en attributs
+privés de la classe \texttt{Synchro}. Comme pour la section partagée, ce sémaphore est initialisé à 0 et agit comme une barrière.
+La gestion de la gare se fait dans la méthode \texttt{Synchro::stopAtStation}.
+
+
+Si la locomotive arrive à la gare en premier, elle doit attendre la deuxième. Pour simuler ce comportement, la première locomotive
+va acquire le sémaphore \texttt{station} et va donc devoir attendre l'arrivée en gare de la seconde locomotive avant de faire sa
+routine (attendre 5 secondes). La priorité de la locomotive est alors mise à 0, ce qui signifie qu'elle n'est pas prioritaire pour 
+l'accès à la section partagée. Si la locomotive qui arrive en gare est la dernière à arriver, elle release le sémaphore \texttt{waiting} 
+pour libérer l'autre locomotive en attente. La priorité de la locomotive est 
+alors mise à 1, ce qui signifie qu'elle est prioritaire pour l'accès à la section partagée. 
+Une fois les 5 secondes d'attente passées, les deux locomotives peuvent redémarrer.
+
+\subsection*{Gestion variables partagées}
+Certaines variables sont partagées entre plusieurs threads, il faut donc protéger leur accès. En particulier, les attributs
+\texttt{nbLoco}, \texttt{locoCounter} de la classe \texttt{Synchro} sont partagés entre les différents threads lancés sur 
+\\ \texttt{LocomotiveBehavior::run()}. Afin de les protéger, nous avons ajouté un sémaphore \texttt{mutex} comme attribut de la
+classe \texttt{Syncrho}. Ce sémaphore est initilaisé à 1 et se comporte donc comme un mutex. Il est acquire dès qu'on doit 
+modifier des variables partagées ou qu'on a besoin d'une lecture protégée, par exemple dans la condition d'un \texttt{if}.
+Le sémaphore est release dès qu'on a fini notre travail. D'une manière générale, nous essayons de réduire la section critique
+au minimum, afin de de ne pas bloquer des threads pour rien. Le mutex est aussi systématiquement release avant qu'un thread passe 
+en attente sur les sémaphores \texttt{waiting} ou \texttt{station}, encore une fois afin de ne pas bloquer les autres threads pendant
+l'attente. Une fois l'attente terminée, le mutex peut être acquire à nouveau, si besoin.
 
 \subsection*{Classe Route}
+Nous avons défini et implémenté une nouvelle classe \texttt{Route}, dont le nom est la traduction de "parcours" en anglais, qui 
+représente les principales cractéristiques du parcours suivi par une locomotive en particulier. Les attributs de la classe 
+décrivent les points clés du parcours. Les attributs \texttt{station}, \texttt{startSharedSection} et \texttt{endSharedSection}
+contiennent le numéro des points de contact de la gare, du début et de la fin de la section partagée du parcours. Dans l'attribut
+\texttt{aiguillages}, on stocke le numéro et l'orientation des aiguillages permettant d'accéder et de quitter la section partagée.
+L'orientation des aiguillages est propre à chaque locomotive. Tous ces attribust ont une visibilité privée, afin de garantir une
+bonne encapsulation. Nous avons défini des méthodes publiques qui permettent d'attendre la détection de points de contact cités
+ci-dessus et une méthode qui permet de changer la direction des aiguillages pour garantir les fonctionnalités qui peuvent être
+utiles en dehors de la classe. Ces méthodes sont notamment utilisées dans \texttt{LocomotiveBehavior::run()}.
+
+Définir une nouvelle classe est utile pour des raisons d'encapsulation des données, de lisibilité et de modularité.
 
 \subsection*{Modularité}
+Le programme est orienté pour être relativement modulable.
+
+L'utilisation de la classe \texttt{Route} permet d'avoir différents types de parcours. Comme les directions des aiguillages
+sont sockées dans un \texttt{std::Vector}, on peut imaginer un parcours qui demande le changement de direction de plus de 
+deux aiguillages. Si on souhaite, par exemple, avoir plusieurs gares ou sections critiques, on peut changer les attributs qui stockent
+le numéro des points de contact en \texttt{std::Vector} et adapter les méthodes correspondantes en conséquences. (Il faudrait aussi 
+évidemment adapter \texttt{LocomotiveBehavior::run()} pour que le comportement des locomotives ait du sens.)
+
+Le programme a aussi été développé en pensant qu'il pourrait potentiellement y avoir plus de deux locomotives sur la maquette. 
 
 \section*{Tests effectués}
 \noindent
