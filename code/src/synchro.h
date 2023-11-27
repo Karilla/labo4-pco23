@@ -1,10 +1,11 @@
-/*  _____   _____ ____    ___   ___ ___  ____
- * |  __ \ / ____/ __ \  |__ \ / _ \__ \|___ \
- * | |__) | |   | |  | |    ) | | | | ) | __) |
- * |  ___/| |   | |  | |   / /| | | |/ / |__ <
- * | |    | |___| |__| |  / /_| |_| / /_ ___) |
- * |_|     \_____\____/  |____|\___/____|____/
- */
+/**
+\file synchro.h
+\author Eva Ray, Benoit Delay
+\date 26.11.2023
+
+Ce fichier contient l'implémentation de la classe Synchro qui implémente l'interface
+SynchroInterface qui propose les méthodes liées à la section partagée.
+*/
 
 
 #ifndef SYNCHRO_H
@@ -30,8 +31,7 @@ public:
      * @brief Synchro Constructeur de la classe qui représente la section partagée.
      * Initialisez vos éventuels attributs ici, sémaphores etc.
      */
-    Synchro(unsigned int nbLocomotives):  waiting(0), station(0), mutex(1), nbLoco(nbLocomotives) {
-        this->locoCounter = 0;
+    Synchro(unsigned int nbLocomotives):  waiting(0), station(0), mutex(1), nbLoco(nbLocomotives), nbWaitingStation(0), nbWaitingSharedSec(0) {
     }
 
     /**
@@ -51,15 +51,13 @@ public:
           }
         else{
 
+            nbWaitingSharedSec++;
             // On relâche le mutex pour ne pas bloquer les autres threads
             mutex.release();
             loco.arreter();
             loco.afficherMessage("J'attends mon tour.");
             waiting.acquire();
-            // On récupère le mutex lorsqu'on peut accéder à la section partagée
-            mutex.acquire();
             loco.demarrer();
-            mutex.release();
           }
 
         afficher_message(qPrintable(QString("La locomotive no. %1 accède à la section partagée.").arg(loco.numero())));
@@ -72,10 +70,15 @@ public:
      */
     void leave(Locomotive& loco) override {
 
-      if(loco.priority){
+      mutex.acquire();
+
+      if(nbWaitingSharedSec > 0){
 
           waiting.release();
+          nbWaitingSharedSec--;
         }
+
+      mutex.release();
 
       afficher_message(qPrintable(QString("La locomotive no. %1 quitte la section partagée.").arg(loco.numero())));
     }
@@ -88,14 +91,14 @@ public:
 
         loco.arreter();
         mutex.acquire();
-        locoCounter++;
+        nbWaitingStation++;
 
         // Si on arrive à  la gare en dernier
-        if(locoCounter >= nbLoco){
+        if(nbWaitingStation >= nbLoco){
 
             loco.priority = 1;
             station.release();
-            locoCounter = 0;
+            nbWaitingStation = 0;
             mutex.release();
         }
         else{ // Si on n'arrive pas à la gare en dernier
@@ -129,7 +132,11 @@ private:
     /**
      * @brief locoCounter Nombre de locomotives qui attendent à la gare
      */
-    unsigned int locoCounter;
+    unsigned int nbWaitingStation;
+    /**
+     * @brief locoCounterSharedSec Nombre de locomotives qui attendent l'accès à la section partagée
+     */
+    unsigned int nbWaitingSharedSec;
     /**
      * @brief nbLoco Nombre de locomotives dans la simulation
      */
