@@ -11,7 +11,7 @@
 
 \section*{Description des fonctionnalités du logiciel}
 
-Le programme simule le déplacement de deux locomotives, dont le comportment est exécuté par un thread lancé abvec la méthode \texttt{LocomotiveBehavior::run()}. 
+Le programme simule le déplacement de deux locomotives, dont le comportment est exécuté par un thread lancé avec la méthode \texttt{LocomotiveBehavior::run()}. 
 Chaque locomotive a un certain point de départ et suit un parcours cyclique. Les deux
 parcours ont un tronçon commun, auquel une seule locomotive à la fois ne peut accéder. Ce tronçon est appelé "section partagée" ci-après. Si une
 locomotive est en train d'accéder à la section partagée, l'autre s'arrête et attend son tour. 
@@ -97,7 +97,7 @@ deux aiguillages. Si on souhaite, par exemple, avoir plusieurs gares ou sections
 le numéro des points de contact en \texttt{std::Vector} et adapter les méthodes correspondantes en conséquences. (Il faudrait aussi 
 évidemment adapter \texttt{LocomotiveBehavior::run()} pour que le comportement des locomotives ait du sens.)
 
-La classe \texttt{Route} nous permet aussi d'avoir un méthode \texttt{LocomotiveBehavior::run()} propre, simple et sans valeurs 
+La classe \texttt{Route} nous permet aussi d'avoir une méthode \texttt{LocomotiveBehavior::run()} propre, simple et sans valeurs 
 hardcodées.
 
 Le programme a aussi été développé en pensant qu'il pourrait potentiellement y avoir plus de deux locomotives sur la maquette. Il faudrait
@@ -110,24 +110,56 @@ selon la loi du "premier arrivé, premier servi".
 
 \section*{Tests effectués}
 % Description de chaque test, et information sur le fait qu'il ait passé ou non
-\subsection*{Accès à la section partagée}
-De manière générale, lorsqu'on lance la programme normalement, tout se passe comme prévu. La locomotive qui arrive en deuxième à la gare a
-la priorité dans la section critique WIP
+\subsection*{Test: Accès à la section partagée}
 
-\subsection*{Arrêt d'urgence}
-Lorsque les deux locomotives sont en train de rouler er qu'on appuie sur le bouton d'arrêt d'urgence, les locomotives s'arrêtent comme attendu.
+\begin{itemize}
+    
+\item Lorsque la locomotive A arrive en dernier à la gare, elle a la priorité pour l'accès à la section partagée.
+\item Lorsque la locomotive B arrive en dernier à la gare, elle a la priorité pour l'accès à la section partagée.
+\item Lorsqu'une locomotive qui n'a pas la priorité arrive à la section partagée, elle s'arrête et attend son tour.
+\item Lorsqu'une locomotive quitte la section partagée, l'autre locomotive qui était en attente est débloquée et redémarre.
+\item Lorsqu'une locomotive a le droit d'accès à la section partagée, les aiguillages s'orientent dans la direction définie
+par le parcours de la locomotive.
 
-Lorsqu'une seule locomotive roule et qu'on a mis l'autre sur pause, la locomotive qui roule s'arrête et la locomotive qui était sur pause ne
-repart pas quand on appui sur play. C'est le comportement attendu.
+\end{itemize}
 
-Lorsqu'une des deux locomotives est dans la section partagée et qu'on appuie sur l'arrêt d'urgence juste avant le capteur de sortie de la
-section partagée, de telle sorte que la locomotive déclenche tout de même le capteur à cause de l'inertie pendant qu'elle est en train de
-s'arrêter, les deux locomotives sont bien à l'arrêt. La locomotive qui est en train d'attendre l'accès à la section partagée ne redémarre
-pas non plus. 
+Ces tests ont été faits en mettant les locomotives A et B dans chacun des rôles décrits  (en utilisant notamment le bouton pause), 
+afin d'être certain que les résultats des tests ne dépendent pas de la locomotive. La priorité des locomotives accédant à la section 
+partagée a pu être vérifié grâce aux logs affichés. Tous les tests produisent le résultat attendu.
+
+\subsection*{Test: Attente à la gare}
+
+\begin{itemize}
+    
+\item Lorsqu'une locomotive arrive au niveau du contact de sa gare, elle s'arrête.
+\item Lorsqu'une locomotive arrive en gare en premier, elle attend que l'autre arrive avant de faire son décompte de 5 secondes.
+\item Lorsque la deuxième locomotive arrive en gare, les deux locomotives attendent bien 5 secondes avant de repartir.
+\item Lorsqu'une locomotive arrive en gare en premier et que la deuxième n'arrive jamais, la locomotive ne redémarre pas. 
+    
+\end{itemize}
+
+Ces tests ont été faits en mettant les locomotives A et B dans chacun des rôles décrits (en utilisant notamment le bouton pause), 
+afin d'être certain que les résultatsdes tests ne dépendent pas de la locomotive. Tous les tests produisent le résultat attendu.
+
+\subsection*{Test: Arrêt d'urgence}
+
+\begin{itemize}
+
+\item Lorsque les deux locomotives sont en train de rouler er qu'on appuie sur le bouton d'arrêt d'urgence, les locomotives s'arrêtent comme attendu.
+
+\item Lorsqu'une seule locomotive roule et qu'on a mis l'autre sur pause, la locomotive qui roule s'arrête et la locomotive qui était sur pause ne
+repart pas quand on appuie sur start. C'est le comportement attendu.
+
+\item Lorsqu'on appuie sur l'arrêt d'urgence alors qu'une locomotive se trouve dans la section partagée et a juste assez d'inertie pour déclencher
+le capteur de sortie de secion partagée, la locomotive s'arrête et l'autre locomotive qui attend l'accès à la section partagée ne redémarre pas. 
+C'est le comportement attendu.
+
+\end{itemize}
 
 \section*{Conclusion}
-
-
-
+Nous avons implémenté un programme multi-threadé qui simule le déplacement des locomotives conformément au cahier des charges. Nous avons implémenté une 
+gestion de la concurrence et d'accès aux ressources partagées grâce à des sémaphores, qui semblent faire leur travail convenablement. L'accès à la section 
+partagée, la définition des priorités, le changement de direction des aiguillage et l'attente à la gare sont gérés correctement. Le bouton d'arrêt d'urgence 
+fonctionne lui aussi comme attendu et nous permet de mettre fin à la simulation.
 
 \end{document}
