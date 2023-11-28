@@ -111,7 +111,9 @@ public:
 
         // On attend 5 secondes
         PcoThread::thisThread()->usleep(5000000);
+
         loco.demarrer();
+
         afficher_message(qPrintable(QString("The engine no. %1 arrives at the station.").arg(loco.numero())));
     }
 

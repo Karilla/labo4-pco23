@@ -26,7 +26,7 @@ public:
      * \brief locomotiveBehavior Constructeur de la classe
      * \param loco la locomotive dont on représente le comportement
      */
-    LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SynchroInterface> sharedSection, Route parcours) : loco(loco), sharedSection(sharedSection), parcours(parcours){
+    LocomotiveBehavior(Locomotive& loco, std::shared_ptr<SynchroInterface> sharedSection, Route route) : loco(loco), sharedSection(sharedSection), route(route){
     }
 
 protected:
@@ -59,7 +59,7 @@ protected:
     /**
      * @brief parcours Informations sur le parcours que suit la locomotive
      */
-    Route parcours;
+    Route route;
 };
 
 #endif // LOCOMOTIVEBEHAVIOR_H

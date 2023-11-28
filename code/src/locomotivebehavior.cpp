@@ -23,18 +23,18 @@ void LocomotiveBehavior::run()
 
     while(true) {
 
-        parcours.waitForStation();
+        route.waitForStation();
         loco.afficherMessage("J'arrive à la gare.");
         sharedSection->stopAtStation(loco);
 
 
-        parcours.waitForStartSharedSection();
+        route.waitForStartSharedSection();
         loco.afficherMessage(qPrintable(QString("J'arrive en section critique avec la prorité.").arg(loco.priority)));
         sharedSection->access(loco);
         loco.afficherMessage("J'acccède à la section critique.");
-        parcours.adjustAiguillages();
+        route.adjustAiguillages();
 
-        parcours.waitForEndSharedSection();
+        route.waitForEndSharedSection();
         sharedSection->leave(loco);
         loco.afficherMessage("Je quitte la section critique.");
     }

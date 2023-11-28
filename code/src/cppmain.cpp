@@ -28,12 +28,15 @@ partagée, ainsi que le parours de chaque locomotive. On y crée et lance les th
 static Locomotive locoA(0 /* Numéro (pour commande trains sur maquette réelle) */, 10 /* Vitesse */);
 // Locomotive B
 static Locomotive locoB(1 /* Numéro (pour commande trains sur maquette réelle) */, 12 /* Vitesse */);
+// Nombre de locomotives
+const int NB_LOCO = 2;
 
 //Arret d'urgence
 void emergency_stop()
 {
     locoA.arreter();
     locoB.arreter();
+    // On met la vitesse à 0 pour être sûr que les locomotives ne redémarrent pas
     locoA.fixerVitesse(0);
     locoB.fixerVitesse(0);
     afficher_message("\nSTOP!");
@@ -86,11 +89,9 @@ int cmain()
 
     // Loco 0
     locoA.fixerPosition(31, 1);
-    locoA.priority = 0;
 
     // Loco 1
     locoB.fixerPosition(34, 5);
-    locoB.priority = 1;
 
     /***********
      * Message *
@@ -103,7 +104,7 @@ int cmain()
      ********************/
 
     // Création de la section partagée
-    std::shared_ptr<SynchroInterface> sharedSection = std::make_shared<Synchro>(2);
+    std::shared_ptr<SynchroInterface> sharedSection = std::make_shared<Synchro>(NB_LOCO);
 
     // Création des aiguillages critiques du parcours pour chaque locomotive
     std::vector<Aiguillage> aiguillagesLoco0 = {{15, TOUT_DROIT}, {8, TOUT_DROIT}};
@@ -118,7 +119,7 @@ int cmain()
     // Création du thread pour la loco 1
     std::unique_ptr<Launchable> locoBehaveB = std::make_unique<LocomotiveBehavior>(locoB, sharedSection, parcoursLoco1 /*, autres paramètres ...*/);
 
-    // Lanchement des threads
+    // Lancement des threads
     afficher_message(qPrintable(QString("Lancement thread loco A (numéro %1)").arg(locoA.numero())));
     locoBehaveA->startThread();
     afficher_message(qPrintable(QString("Lancement thread loco B (numéro %1)").arg(locoB.numero())));
