@@ -4,7 +4,7 @@
 
 \title{PCO Laboratoire 4 \\
 \large Gestion de Ressources}
-\author{Benoit Delay, Eva Ray}
+\author{Benoît Delay, Eva Ray}
 
 \begin{document}
 \maketitle
@@ -25,7 +25,7 @@ La priorité d'accès à la section partagée est définie comme ceci: la locomo
 Les locomotives continuent leur parcours de manière infinie. Le seul moyen de les arrêter est d'actionner l'arrêt d'urgence. 
 
 Le logiciel simule le déplacement des locomotives par des threads différents, il est donc multi-threadé. Par conséquent, il doit 
-assurer une bonne gestion de la concurrence pour les ressources partagées entre plusieurs threads. En particuiler, l'accès à la section
+assurer une bonne gestion de la concurrence pour les ressources partagées entre plusieurs threads. En particulier, l'accès à la section
 partagée doit être géré conformément au exigences citées ci-dessus. 
 
 \section*{Choix d'implémentation}
@@ -58,7 +58,7 @@ La gestion de la gare se fait dans la méthode \texttt{Synchro::stopAtStation}.
 
 Si la locomotive arrive à la gare en premier, elle doit attendre la deuxième. Pour simuler ce comportement, la première locomotive
 va acquire le sémaphore \texttt{station} et va donc devoir attendre l'arrivée en gare de la seconde locomotive avant de faire sa
-routine (attendre 5 secondes). La priorité de la locomotive est alors mise à 0, ce qui signifie qu'elle n'est pas prioritaire pour 
+routine ( i.e. attendre 5 secondes). La priorité de la locomotive est alors mise à 0, ce qui signifie qu'elle n'est pas prioritaire pour 
 l'accès à la section partagée. Si la locomotive qui arrive en gare est la dernière à arriver, elle release le sémaphore \texttt{waiting} 
 pour libérer l'autre locomotive en attente. La priorité de la locomotive est 
 alors mise à 1, ce qui signifie qu'elle est prioritaire pour l'accès à la section partagée. 
@@ -66,9 +66,9 @@ Une fois les 5 secondes d'attente passées, les deux locomotives peuvent redéma
 
 \subsection*{Gestion variables partagées}
 Certaines variables sont partagées entre plusieurs threads, il faut donc protéger leur accès. En particulier, les attributs
-\texttt{nbWaitingSharedSec}, \texttt{nbWaitingStation} de la classe \texttt{Synchro} sont partagés entre les différents threads lancés sur 
+\texttt{nbWaitingSharedSec} et \texttt{nbWaitingStation} de la classe \texttt{Synchro} sont partagés entre les différents threads lancés sur 
 \texttt{LocomotiveBehavior::run()}. Afin de les protéger, nous avons ajouté un sémaphore \texttt{mutex} comme attribut de la
-classe \texttt{Syncrho}. Ce sémaphore est initilaisé à 1 et se comporte donc comme un mutex. Il est acquire dès qu'on doit 
+classe \texttt{Synchro}. Ce sémaphore est initilaisé à 1 et se comporte donc comme un mutex. Il est acquire dès qu'on doit 
 modifier des variables partagées ou qu'on a besoin d'une lecture protégée, par exemple dans la condition d'un \texttt{if}.
 Le sémaphore est release dès qu'on a fini notre travail. D'une manière générale, nous essayons de réduire la section critique
 au minimum, afin de de ne pas bloquer des threads pour rien. Le mutex est aussi systématiquement release avant qu'un thread passe 
@@ -110,6 +110,11 @@ selon la loi du "premier arrivé, premier servi".
 
 \section*{Tests effectués}
 % Description de chaque test, et information sur le fait qu'il ait passé ou non
+
+Le résultat des tests ci-dessous a notamment pu être vérifié grâce au fait que les locomotives log dans l'interface graphique tous leurs
+comportements. En particulier, un message apparait lorsqu'une locomotive arrive en gare, accède à la section partagée avec une certain priorité
+ou quitte la section partagée.
+
 \subsection*{Test: Accès à la section partagée}
 
 \begin{itemize}
@@ -120,6 +125,9 @@ selon la loi du "premier arrivé, premier servi".
 \item Lorsqu'une locomotive quitte la section partagée, l'autre locomotive qui était en attente est débloquée et redémarre.
 \item Lorsqu'une locomotive a le droit d'accès à la section partagée, les aiguillages s'orientent dans la direction définie
 par le parcours de la locomotive.
+\item Lorsqu'une locomotive accède à la section partagée et s'y arrête, l'autre locomotive continue d'attendre. 
+\item Lorsqu'une locomotive qui n'a pas la priorité attend l'accès à la section partagée mais que la locomotive qui a la 
+priorité n'arrive jamais, elle attend indéfiniment.
 
 \end{itemize}
 
@@ -146,15 +154,16 @@ afin d'être certain que les résultatsdes tests ne dépendent pas de la locomot
 \begin{itemize}
 
 \item Lorsque les deux locomotives sont en train de rouler er qu'on appuie sur le bouton d'arrêt d'urgence, les locomotives s'arrêtent comme attendu.
-
 \item Lorsqu'une seule locomotive roule et qu'on a mis l'autre sur pause, la locomotive qui roule s'arrête et la locomotive qui était sur pause ne
 repart pas quand on appuie sur start. C'est le comportement attendu.
-
 \item Lorsqu'on appuie sur l'arrêt d'urgence alors qu'une locomotive se trouve dans la section partagée et a juste assez d'inertie pour déclencher
 le capteur de sortie de secion partagée, la locomotive s'arrête et l'autre locomotive qui attend l'accès à la section partagée ne redémarre pas. 
 C'est le comportement attendu.
 
 \end{itemize}
+
+En plus de ces tests, nous avons aussi laissé tourner la simulation pour une vingtaine de tours et les locomotives ont toujours eu le comportement
+espéré. Nous avons aussi beaucoup joué avec le bouton pause et nous n'avons jamais rencontré de comportements innatendus.
 
 \section*{Conclusion}
 Nous avons implémenté un programme multi-threadé qui simule le déplacement des locomotives conformément au cahier des charges. Nous avons implémenté une 
